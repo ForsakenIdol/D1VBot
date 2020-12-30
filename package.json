@@ -1,0 +1,33 @@
+{
+  "name": "d1vbot",
+  "version": "0.0.1",
+  "description": "A Discord bot that is totally not for D1V. Go figure.",
+  "main": "src/index.js",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.16.0",
+    "typescript": "^4.1.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ForsakenIdol/D1VBot.git"
+  },
+  "keywords": [
+    "d1vbot",
+    "discord"
+  ],
+  "author": "ForsakenIdol",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ForsakenIdol/D1VBot/issues"
+  },
+  "homepage": "https://github.com/ForsakenIdol/D1VBot#readme"
+}
