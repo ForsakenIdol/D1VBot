@@ -14,7 +14,7 @@ client.on('ready', () => {
   console.log("Scraping each channel in Aesthetics...");
   guild_channels.each(channel => {
     getall(channel, 500)
-    .then(messages => {messages === null ? console.log(`Skipped voice channel ${channel.name}!`) : console.log(`Pulled ${messages.length} messages from the "${channel.name}" channel.`);})
+    .then(messages => {messages === null ? console.log(`Skipped voice channel ${channel.name}!`) : console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "${channel.name}" channel.`);})
     .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
   });
 

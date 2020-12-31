@@ -14,10 +14,11 @@ async function getall(channel, limit = 500) {
       if (last_id) options.before = last_id;
 
       const messages = await channel.messages.fetch(options);
-      sum_messages.push(...messages.array());
-      last_id = messages.last().id;
+      // Skip embedded messages - I might be able to use reduce() instead of looping.
+      for (var message in messages.array()) if (message !== undefined) sum_messages.push(message);
+      last_id = sum_messages[sum_messages.length - 1].id;
 
-      console.log(`Pulled ${sum_messages.length} messages...`);
+      console.log(`Pulled ${sum_messages.length} messages from the ${channel.name} channel...`);
       if (messages.size != 100 || sum_messages.length >= limit) return sum_messages;
   }
 } 
