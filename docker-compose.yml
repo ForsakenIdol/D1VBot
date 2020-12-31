@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  bot:
+    container_name: d1vbot
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app
+    restart: always
+    command: ["nodemon", "-L", "src/index.js"]
+    env_file: 
+        - config.env
