@@ -1,4 +1,4 @@
-const { Discord, path, getall } = require("./utils");
+const { Discord, getall } = require("./utils");
 
 const client = new Discord.Client();
 

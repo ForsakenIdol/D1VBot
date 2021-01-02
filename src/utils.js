@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const path = require('path');
 
 async function getall(channel, limit = 500) {
   if (channel.type === 'voice') {
@@ -24,4 +23,4 @@ async function getall(channel, limit = 500) {
   }
 } 
 
-module.exports = { Discord, path, getall }
+module.exports = { Discord, getall }
