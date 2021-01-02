@@ -15,6 +15,7 @@ async function getall(channel, limit = 500) {
 
       const messages = await channel.messages.fetch(options);
       // Skip embedded messages - I might be able to use reduce() instead of looping.
+      // Maybe instead of skipping embedded messages, check whether the message is embedded and if it is, insert the embedded message with an embedded keyword?
       for (var message in messages.array()) if (message !== undefined) sum_messages.push(message);
       last_id = sum_messages[sum_messages.length - 1].id;
 
