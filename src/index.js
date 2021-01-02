@@ -13,7 +13,7 @@ client.on('ready', () => {
   // Scrape each channel
   console.log("Scraping each channel in Aesthetics...");
   guild_channels.each(channel => {
-    getall(channel, 500)
+    getall(channel)
     .then(messages => {
       // Handle messages here
       messages === null ? console.log(`Skipped voice channel ${channel.name}!`) : console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "${channel.name}" channel.`);

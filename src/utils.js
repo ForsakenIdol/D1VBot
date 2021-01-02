@@ -1,6 +1,8 @@
 const Discord = require('discord.js');
 
-async function getall(channel, limit = 500) {
+async function getall(channel) {
+  const limit = Math.floor(Number.MAX_SAFE_INTEGER / 100);
+
   if (channel.type === 'voice') {
     console.log(`${channel.name} is a voice channel. Skipping...`);
     return null;
@@ -18,7 +20,7 @@ async function getall(channel, limit = 500) {
       for (var message in messages.array()) if (message !== undefined) sum_messages.push(message);
       last_id = sum_messages[sum_messages.length - 1].id;
 
-      console.log(`Pulled ${sum_messages.length} messages from the ${channel.name} channel...`);
+      if (sum_messages.length % 1000 === 0) console.log(`Pulled ${sum_messages.length} messages from the ${channel.name} channel...`);
       if (messages.size != 100 || sum_messages.length >= limit) return sum_messages;
   }
 } 
