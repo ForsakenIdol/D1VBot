@@ -40,8 +40,17 @@ client.on('ready', () => {
           getall(channel)
           .then(messages => {
             // Handle messages here
-            messages === null ? console.log(`Skipped voice channel ${channel.name}!`) :
-                                console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel.`);
+            if (messages === "voice") console.log(`Skipped voice channel ${channel.name}!`);
+            else {
+              console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel. Inserting into the database now.`);
+              messages.forEach(message => {
+                db.query("INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?);",
+                  [message.id, message.content, message.pinned,
+                   Discord.SnowflakeUtil.deconstruct(message.createdTimestamp.toString(10)).date,
+                   message.user_id, message.channel_id]
+                );
+              });
+            }
           })
           .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
         })
@@ -64,4 +73,5 @@ client.on('message', msg => {
   }
 });
 
-client.login(process.env.BOTAPITOKEN);
+// This promise resolves with the bot's API token - do not log this!
+client.login(process.env.BOTAPITOKEN).catch(error => {throw new Error(error);});

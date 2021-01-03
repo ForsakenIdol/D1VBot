@@ -1,11 +1,12 @@
 const Discord = require('discord.js');
 const mysql = require('mysql');
+const { Message } = require("./datatypes");
 
 async function getall(channel) {
-  const limit = Math.floor(Number.MAX_SAFE_INTEGER / 100);
-  //const limit = 500;
+  //const limit = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
+  const limit = 1000;
 
-  if (channel.type === 'voice') return null; // Skip voice channels
+  if (channel.type === 'voice') return "voice"; // Skip voice channels
   let sum_messages = [];
   let last_id;
   console.log(`Getting a maximum of ${limit} messages from the channel ${channel.name}.`);
@@ -16,7 +17,13 @@ async function getall(channel) {
       const messages = await channel.messages.fetch(options);
       // Skip embedded messages - I might be able to use reduce() instead of looping.
       // Maybe instead of skipping embedded messages, check whether the message is embedded and if it is, insert the embedded message with an embedded keyword?
-      for (let i = 0; i < messages.array().length; i++) if (messages.array()[i] !== undefined) sum_messages.push(messages.array()[i]);
+      for (let i = 0; i < messages.array().length; i++) if (messages.array()[i] !== undefined) {
+        // Construct and push the message object.
+        sum_messages.push(new Message(
+          messages.array()[i].id, messages.array()[i].content.replace(/[^\x00-\x7F]/g, ""), messages.array()[i].pinned,
+          messages.array()[i].createdTimestamp, messages.array()[i].author.id, messages.array()[i].channel.id
+        ));
+      }
       if(sum_messages.length > 0 && last_id === sum_messages[sum_messages.length - 1].id) return sum_messages;
       else last_id = sum_messages[sum_messages.length - 1].id;
 
