@@ -1,7 +1,7 @@
 CREATE DATABASE IF NOT EXISTS discord;
 USE discord;
 
-DROP TABLE IF EXISTS messages, users, channels;
+DROP TABLE IF EXISTS messages, users, channels, guilds;
 
 CREATE TABLE users(
   id VARCHAR(18) PRIMARY KEY NOT NULL,

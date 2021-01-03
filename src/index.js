@@ -15,7 +15,17 @@ client.on('ready', () => {
   // Initialize MySQL connection
   db.connect(err => {
     if (err) {console.log(err); throw new Error("Error connecting to the database.");}
-    else console.log("Connected to the MySQL container!");
+    else {
+      console.log("Connected to the MySQL container!");
+      // Drop the contents of all the tables
+      ["messages", "users", "channels", "guilds"].forEach(table => {
+        console.log(`Clearing the ${table} table!`);
+        db.query(`DELETE FROM ${table};`, (err, result, fields) => {
+          if (err) {console.log(err); throw new Error(`Could not delete from the ${table} table.`);}
+          else console.log(`Successfully deleted from the ${table} table!`);
+        });
+      });
+    }
   });
   // Pull guild information
   const Guilds = client.guilds.cache;
