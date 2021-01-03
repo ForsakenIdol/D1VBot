@@ -10,5 +10,17 @@ services:
       - /usr/src/app/node_modules
     restart: always
     command: ["nodemon", "-L", "src/index.js"]
+    depends_on:
+      - db
     env_file: 
         - config.env
+  db:
+    container_name: discord_db
+    image: mysql:8.0.22
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      # This allows us to initialize a database from a dump on container load.
+      - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    restart: always
+    env_file:
+      - db.env
