@@ -1,4 +1,5 @@
 const { Discord, mysql, getall } = require("./utils");
+const { Guild, User, Channel, Message } = require("./datatypes");
 
 const db = mysql.createConnection({
   host: process.env.DBHOST,
@@ -25,26 +26,28 @@ client.on('ready', () => {
           else console.log(`Successfully deleted from the ${table} table!`);
         });
       });
+
+      // Once table information has been cleared, we can pull information for each guild and insert that information into the database.
+      const Guilds = client.guilds.cache;
+      Guilds.forEach(guild => {
+        db.query("INSERT INTO guilds VALUES(?, ?, ?, ?);", [guild.id, guild.name, guild.nameAcronym, guild.ownerID], (err, result, fields) => {
+          if (err) console.log(err);
+          else console.log(`Successfully inserted guild ${guild.name} into the database.`);
+        });
+        // Scrape each channel
+        console.log(`Scraping each channel in ${guild.name}...`);
+        guild.channels.cache.each(channel => {
+          getall(channel)
+          .then(messages => {
+            // Handle messages here
+            messages === null ? console.log(`Skipped voice channel ${channel.name}!`) :
+                                console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel.`);
+          })
+          .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
+        })
+      });
     }
   });
-  // Pull guild information
-  const Guilds = client.guilds.cache;
-  let guild_id, guild_name, guild_channels;
-  [guild_id, guild_name, guild_channels] = Guilds.map(guild => [guild.id, guild.name, guild.channels.cache])[0];
-  console.log(`There are ${guild_channels.size} channels altogether.\n`); // There are 2 hidden channels in Aesthetics.
-
-  // Scrape each channel
-  console.log("Scraping each channel in Aesthetics...");
-  guild_channels.each(channel => {
-    getall(channel)
-    .then(messages => {
-      // Handle messages here
-      messages === null ? console.log(`Skipped voice channel ${channel.name}!`) :
-                          console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel.`);
-    })
-    .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
-  });
-
 });
 
 client.on('message', msg => {
