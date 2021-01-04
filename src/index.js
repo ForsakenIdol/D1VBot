@@ -55,16 +55,16 @@ client.on('ready', () => {
           guild.channels.cache.forEach(channel => {
             // Insert each channel into the database
             db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
-              if (err) throw new Error(err);
+              if (err) {console.log(channel.type); throw new Error(err);}
               // If there is no error, scrape each channel and insert the messages into the database
               else getall(channel)
               .then(messages => {
                 // Handle messages here
-                if (messages === "voice") console.log(`Skipped voice channel ${channel.name}!`);
+                if (messages === null) console.log(`Skipped non-text channel ${channel.name}!`);
                 else {
                   console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel. Inserting into the database now.`);
                   messages.forEach(message => {
-                    db.query("INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?);",
+                    db.query("INSERT INTO messages(id, content, pinned, createdTimestamp, user_id, channel_id) VALUES(?, ?, ?, ?, ?, ?);",
                       [message.id, message.content, message.pinned,
                       Discord.SnowflakeUtil.deconstruct(message.createdTimestamp.toString(10)).date,
                       message.user_id, message.channel_id], (err, result, fields) => {
@@ -87,11 +87,17 @@ client.on('ready', () => {
 client.on('message', msg => {
   switch (msg.content.toLowerCase()) {
     case 'rm -rf 20':
-      // Clear the last 20 messages
-      msg.channel.bulkDelete(20);
-      console.log("Cleared 20 messages!");
-      msg.channel.send("Cleared 20 messages.");
-    break;
+      if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command.`);
+      else {
+        // Clear the last 20 messages
+        msg.channel.bulkDelete(20);
+        console.log("Cleared 20 messages!");
+        msg.channel.send("Cleared 20 messages.");
+      }
+      break;
+    case 'ping forsakenidol':
+      if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command. Nevermind, I pinged him anyway. Eh, who cares, let's do it again. <@!309501599313821708>. Why do I do this to myself? -.-`);
+      elsemsg.channel.send("<@!309501599313821708> has been summoned.");
     default:
       //console.log(msg.getOwnPropertyNames());
       break;
