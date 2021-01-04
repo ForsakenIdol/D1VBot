@@ -98,6 +98,13 @@ client.on('message', msg => {
     case 'ping forsakenidol':
       if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command. Nevermind, I pinged him anyway. Eh, who cares, let's do it again. <@!309501599313821708>. Why do I do this to myself? -.-`);
       elsemsg.channel.send("<@!309501599313821708> has been summoned.");
+    case 'd1vbot --exec shutdown':
+      if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command.`);
+      else {
+        console.log("Shutdown requested.");
+        msg.channel.send("Shutting down D1VBot... Goodbye.");
+        setTimeout(() => {client.destroy();}, 1000);
+      }
     default:
       //console.log(msg.getOwnPropertyNames());
       break;
