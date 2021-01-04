@@ -67,7 +67,9 @@ client.on('ready', () => {
                     db.query("INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?);",
                       [message.id, message.content, message.pinned,
                       Discord.SnowflakeUtil.deconstruct(message.createdTimestamp.toString(10)).date,
-                      message.user_id, message.channel_id]
+                      message.user_id, message.channel_id], (err, result, fields) => {
+                        if (err) throw new Error(err);
+                      }
                     );
                   });
                 }
