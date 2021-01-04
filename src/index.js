@@ -10,9 +10,15 @@ const db = mysql.createConnection({
 });
 
 const client = new Discord.Client();
+const prefix = "--";
+const admins = [
+  '199792741058609153', /* ELL1, ARE3 */
+  '309501599313821708' /* ForsakenIdol */
+]
 
 client.on('ready', () => {
   console.log(`\nLogged in as ${client.user.tag}!`);
+  client.user.setPresence({ status: "online", activity: { name: `Type ${prefix}help for help with commands!` } });
   // Initialize MySQL connection
   db.connect(err => {
     if (err) {console.log(err); throw new Error("Error connecting to the database.");}
@@ -85,29 +91,55 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-  switch (msg.content.toLowerCase()) {
-    case 'rm -rf 20':
-      if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command.`);
-      else {
-        // Clear the last 20 messages
-        msg.channel.bulkDelete(20);
-        console.log("Cleared 20 messages!");
-        msg.channel.send("Cleared 20 messages.");
-      }
-      break;
-    case 'ping forsakenidol':
-      if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command. Nevermind, I pinged him anyway. Eh, who cares, let's do it again. <@!309501599313821708>. Why do I do this to myself? -.-`);
-      elsemsg.channel.send("<@!309501599313821708> has been summoned.");
-    case 'd1vbot --exec shutdown':
-      if (msg.member.id !== '309501599313821708') msg.channel.send(`You are not <@!309501599313821708>, and so cannot execute this command.`);
-      else {
-        console.log("Shutdown requested.");
-        msg.channel.send("Shutting down D1VBot... Goodbye.");
-        setTimeout(() => {client.destroy();}, 1000);
-      }
-    default:
-      //console.log(msg.getOwnPropertyNames());
-      break;
+
+  // First, add this message to the database.
+  db.query("INSERT INTO messages(id, content, pinned, createdTimestamp, user_id, channel_id) VALUES(?, ?, ?, ?, ?, ?)",
+           [msg.id, msg.content, msg.pinned ? 1 : 0, 
+            Discord.SnowflakeUtil.deconstruct(msg.createdTimestamp.toString(10)).date,
+            msg.author.id, msg.channel.id], (err, result, fields) => {
+    if (err) console.log(err);
+  });
+
+  // Then, check if the message called a command.
+  if (msg.content.startsWith(prefix)) {
+    const components = msg.content.split(' ');
+    components[0] = components[0].replace("--", "");
+    console.log(components);
+    switch (components[0].toLowerCase()) {
+      // Removes any number of messages from this channel.
+      // Does not check whether the user tries to remove more messages than there are currently in the channel.
+      case 'rm':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !parseInt(components[1])) msg.channel.send(`Incorrect usage. This command expects 2 arguments. Use \`${prefix}rm <num>\` to remove the last \`num\` messages in this channel.`);
+        else if (parseInt(components[1]) > 20) msg.channel.send("You can only delete up to 20 messages at a single time.");
+        else {
+          const numDelete = parseInt(components[1]);
+          // Clear the last 'numDelete' messages
+          msg.channel.bulkDelete(numDelete).then(deletedMessages => {
+            deletedMessages.forEach(message => {
+              db.query(`UPDATE messages SET deleted=1 WHERE id='${message.id}';`, (err, result, fields) => {
+                if (err) {
+                  console.log(err);
+                  console.log(`Could not delete message with content ${message.content}.`);
+                } else console.log(`Deleted message with content "${message.content}" by ${message.author.username}.`);
+              });
+            })
+          }).then(() => {
+            console.log(`Cleared ${numDelete} messages!`);
+            msg.channel.send(`<@${msg.author.id}> cleared ${numDelete} messages.`).then(response => setTimeout(() => response.delete(), 5000));
+          });
+        }
+        break;
+      case 'shutdown':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else {
+          console.log("Shutdown requested.");
+          msg.channel.send("Shutting down D1VBot... Goodbye.");
+          setTimeout(() => {client.destroy();}, 1000);
+        }
+      default:
+        break;
+    }
   }
 });
 
