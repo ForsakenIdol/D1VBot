@@ -21,7 +21,7 @@ CREATE TABLE guilds(
 CREATE TABLE channels(
   id VARCHAR(18) PRIMARY KEY NOT NULL CHECK (CHAR_LENGTH(id) = 18),
   name TEXT NOT NULL,
-  type ENUM('text', 'voice') NOT NULL,
+  type ENUM('dm', 'text', 'voice', 'category', 'news', 'store', 'unknown') NOT NULL,
   guild_id VARCHAR(18),
   FOREIGN KEY (guild_id) REFERENCES guilds(id)
 );
@@ -36,5 +36,6 @@ CREATE TABLE messages(
   createdTimestamp DATETIME NOT NULL,
   user_id VARCHAR(18) NULL,
   channel_id VARCHAR(18) NOT NULL,
+  deleted TINYINT(1) NOT NULL DEFAULT 0,
   FOREIGN KEY (channel_id) REFERENCES channels(id)
 );
