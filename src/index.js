@@ -19,13 +19,17 @@ client.on('ready', () => {
     else {
       console.log("Connected to the MySQL container!");
       // Drop the contents of all the tables
-      ["messages", "users", "channels", "guilds"].forEach(table => {
-        console.log(`Clearing the ${table} table!`);
-        db.query(`DELETE FROM ${table};`, (err, result, fields) => {
-          if (err) {console.log(err); throw new Error(`Could not delete from the ${table} table.`);}
-          else console.log(`Successfully deleted from the ${table} table!`);
+      new Promise((resolve, reject) => {
+        console.log("Clearing all database tables...");
+        let tablesCleared = 0;
+        let tables = ["messages", "users", "channels", "guilds"]
+        tables.forEach(table => {
+          db.query(`DELETE FROM ${table};`, (err, result, fields) => {
+            if (err) {console.log(err); reject(new Error(`Could not delete from the ${table} table.`));}
+            else { tablesCleared++; if (tablesCleared === tables.length) resolve(); }
+          });
         });
-      });
+      }).then(() => console.log("Cleared all database tables!")).catch(error => {throw new Error(error)});
 
       // Once table information has been cleared, we can pull information for each guild and insert that information into the database.
       const Guilds = client.guilds.cache;
@@ -49,11 +53,11 @@ client.on('ready', () => {
         });
 
         
-        console.log(`Scraping each channel in ${guild.name}...`);
+        console.log(`\nScraping each channel in ${guild.name}...\n`);
         guild.channels.cache.each(channel => {
           // Insert each channel into the database
           db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
-            if (err) console.log(err);
+            if (err) throw new Error(err);
             // If there is no error, scrape each channel and insert the messages into the database
             else getall(channel)
             .then(messages => {
@@ -71,9 +75,10 @@ client.on('ready', () => {
               }
             })
             .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
-          });
-          
-        })
+          });  
+        });
+
+
       });
     }
   });
