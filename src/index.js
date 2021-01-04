@@ -22,7 +22,7 @@ client.on('ready', () => {
       new Promise((resolve, reject) => {
         console.log("Clearing all database tables...");
         let tablesCleared = 0;
-        let tables = ["messages", "users", "channels", "guilds"]
+        let tables = ["messages", "channels", "guilds", "users"]
         tables.forEach(table => {
           db.query(`DELETE FROM ${table};`, (err, result, fields) => {
             if (err) {console.log(err); reject(new Error(`Could not delete from the ${table} table.`));}
@@ -41,43 +41,41 @@ client.on('ready', () => {
             const user = member.user;
             db.query("INSERT INTO users VALUES(?, ?, ?, ?);", [user.id, user.username.replace(/[^\x00-\x7F]/g, ""), user.bot ? 1 : 0, user.discriminator], (users_err, result, fields) => {
               if (users_err) throw new Error(users_err);
-              else console.log(`Successfully inserted user ${user.username.replace(/[^\x00-\x7F]/g, "")}:${user.discriminator} into the database.`)
             })
           });
-        }).catch(error => {throw new Error(error);})
-
-        // Insert information about this guild into the database
-        db.query("INSERT INTO guilds VALUES(?, ?, ?, ?);", [guild.id, guild.name, guild.nameAcronym, guild.ownerID], (err, result, fields) => {
-          if (err) console.log(err);
-          else console.log(`Successfully inserted guild ${guild.name} into the database.`);
-        });
-
-        
-        console.log(`\nScraping each channel in ${guild.name}...\n`);
-        guild.channels.cache.each(channel => {
-          // Insert each channel into the database
-          db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
-            if (err) throw new Error(err);
-            // If there is no error, scrape each channel and insert the messages into the database
-            else getall(channel)
-            .then(messages => {
-              // Handle messages here
-              if (messages === "voice") console.log(`Skipped voice channel ${channel.name}!`);
-              else {
-                console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel. Inserting into the database now.`);
-                messages.forEach(message => {
-                  db.query("INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?);",
-                    [message.id, message.content, message.pinned,
-                     Discord.SnowflakeUtil.deconstruct(message.createdTimestamp.toString(10)).date,
-                     message.user_id, message.channel_id]
-                  );
-                });
-              }
-            })
-            .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
-          });  
-        });
-
+        }).then(() => {
+          console.log("All users added to database!");
+          // Insert information about this guild into the database
+          db.query("INSERT INTO guilds VALUES(?, ?, ?, ?);", [guild.id, guild.name, guild.nameAcronym, guild.ownerID], (err, result, fields) => {
+            if (err) console.log(err);
+            else console.log(`Successfully inserted guild ${guild.name} into the database.`);
+          });
+        }).then(() => {
+          console.log(`\nScraping each channel in ${guild.name}...\n`);
+          guild.channels.cache.forEach(channel => {
+            // Insert each channel into the database
+            db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
+              if (err) throw new Error(err);
+              // If there is no error, scrape each channel and insert the messages into the database
+              else getall(channel)
+              .then(messages => {
+                // Handle messages here
+                if (messages === "voice") console.log(`Skipped voice channel ${channel.name}!`);
+                else {
+                  console.log(`[TOTAL] Pulled a total of ${messages.length} messages from the "#${channel.name}" channel. Inserting into the database now.`);
+                  messages.forEach(message => {
+                    db.query("INSERT INTO messages VALUES(?, ?, ?, ?, ?, ?);",
+                      [message.id, message.content, message.pinned,
+                      Discord.SnowflakeUtil.deconstruct(message.createdTimestamp.toString(10)).date,
+                      message.user_id, message.channel_id]
+                    );
+                  });
+                }
+              })
+              .catch(error => {console.log(`\nError while fetching from ${channel.name}!`); console.log(error);});
+            });  
+          });
+        }).catch(error => {throw new Error(error);});
 
       });
     }

@@ -9,7 +9,7 @@ async function getall(channel) {
   if (channel.type === 'voice') return "voice"; // Skip voice channels
   let sum_messages = [];
   let last_id;
-  console.log(`Getting a maximum of ${limit} messages from the channel ${channel.name}.`);
+  console.log(`Getting a maximum of ${limit} messages from the channel ${channel.name} with ID ${channel.id}...`);
   while (true) {
       let options = { limit: 100 };
       if (last_id) options = { limit: 100, before: last_id }
