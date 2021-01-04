@@ -1,4 +1,4 @@
-const { Discord, mysql, getall } = require("./utils");
+const { Discord, mysql, getall, prefix, help_message } = require("./utils");
 const { Guild, User, Channel, Message } = require("./datatypes");
 
 const db = mysql.createConnection({
@@ -10,7 +10,6 @@ const db = mysql.createConnection({
 });
 
 const client = new Discord.Client();
-const prefix = "--";
 const admins = [
   '199792741058609153', /* ELL1, ARE3 */
   '309501599313821708' /* ForsakenIdol */
@@ -106,6 +105,9 @@ client.on('message', msg => {
     components[0] = components[0].replace("--", "");
     console.log(components);
     switch (components[0].toLowerCase()) {
+      case 'help':
+        msg.channel.send(help_message);
+        break;
       // Removes any number of messages from this channel.
       // Does not check whether the user tries to remove more messages than there are currently in the channel.
       case 'rm':
@@ -137,6 +139,9 @@ client.on('message', msg => {
           msg.channel.send("Shutting down D1VBot... Goodbye.");
           setTimeout(() => {client.destroy();}, 1000);
         }
+      case 'ping':
+        msg.channel.send(`:ping_pong: Bot latency is ${msg.createdTimestamp - Date.now()}ms. API latency is ${client.ws.ping}ms.`);
+        break;
       default:
         break;
     }

@@ -2,6 +2,14 @@ const Discord = require('discord.js');
 const mysql = require('mysql');
 const { Message } = require("./datatypes");
 
+const prefix = "--";
+const help_message = `\
+Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me include:
+- \`${prefix}ping\`: Gets the bot's local and API ping.
+- \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in. **Admin Command**.
+- \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
+`
+
 async function getall(channel) {
   //const limit = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
   const limit = 1000;
@@ -33,4 +41,4 @@ async function getall(channel) {
   }
 } 
 
-module.exports = { Discord, mysql, getall }
+module.exports = { Discord, mysql, getall, prefix, help_message }
