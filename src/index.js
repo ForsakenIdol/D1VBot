@@ -158,5 +158,38 @@ client.on('messageDelete', msg => {
   });
 });
 
+client.on('userUpdate', (oldUser, newUser) => {
+  let new1 = new User(newUser.id, newUser.username, newUser.bot ? 1 : 0, newUser.discriminator);
+  if (oldUser.id !== new1.id) console.log(`There was a problem. User with old username ${oldUser.username} and new username ${newUser.username} has had their ID changed from ${oldUser.id} to ${newUser.id}.`);
+  else db.query("UPDATE users SET username = ? AND bot = ? AND discriminator = ? WHERE id = ?;",
+                [new1.username, new1.bot, new1.discriminator, new1.id], (err, result, fields) => {
+                  if (err) throw new Error(err);
+                  else console.log(new1);
+                });
+});
+
+client.on('guildMemberAdd', member => {
+  db.query("INSERT INTO users VALUES(?, ?, ?, ?);",
+           [member.id, member.user.username, member.user.bot ? 1 : 0, member.user.discriminator], (err, result, fields) => {
+              if (err) throw new Error(err);
+              else console.log(`User ${member.user.username}#${member.user.discriminator} has joined the guild and has been added to the database!`);
+  });
+});
+
+client.on('guildMemberRemove', member => {
+  db.query("DELETE FROM users WHERE id = ?;", [member.id], (err, result, fields) => {
+    if (err) throw new Error(err);
+    else console.log(`User ${member.user.username}#${member.user.discriminator}  has left the guild and has been removed from the database.`);
+  })
+});
+
+client.on('guildUpdate', (oldGuild, newGuild) => {
+  db.query("UPDATE guilds SET name = ? AND acronym = ? AND owner_id = ? WHERE id = ?;",
+           [newGuild.name, newGuild.nameAcronym, newGuild.ownerID], (err, result, fields) => {
+              if (err) throw new Error(err);
+              else console.log(`The guild with previous name ${oldGuild.name} has been updated to ${newGuild.name}.`);
+           });
+});
+
 // This promise resolves with the bot's API token - do not log this!
 client.login(process.env.BOTAPITOKEN).catch(error => {throw new Error(error);});

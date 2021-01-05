@@ -11,8 +11,8 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 `
 
 async function getall(channel) {
-  const limit = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
-  //const limit = 1000;
+  //const limit = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
+  const limit = 1000;
 
   if (!["dm", "text", "news"].includes(channel.type)) return null; // Skip all non-text channels
   let sum_messages = [];
