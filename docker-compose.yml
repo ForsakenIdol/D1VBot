@@ -24,5 +24,7 @@ services:
       # This specifies the configuration files.
       - ./conf.d:/etc/mysql/conf.d
     restart: always
+    cap_add: 
+      - SYS_NICE
     env_file:
       - db.env
