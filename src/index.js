@@ -122,7 +122,7 @@ client.on('message', msg => {
           msg.channel.bulkDelete(numDelete).then(deletedMessages => {
             deletedMessages.forEach(message => {
               console.log(message);
-              db.query(`UPDATE messages SET deleted=1 WHERE id='?';`, [message.id], (err, result, fields) => {
+              db.query(`UPDATE messages SET deleted=1 WHERE id=?;`, [message.id], (err, result, fields) => {
                 if (err) {
                   console.log(err);
                   console.log(`Could not delete message with content ${message.content}.`);
@@ -152,7 +152,7 @@ client.on('message', msg => {
 });
 
 client.on('messageDelete', msg => {
-  db.query(`UPDATE messages SET deleted = 1 WHERE id = '?';`, [msg.id], (err, result, fields) => {
+  db.query(`UPDATE messages SET deleted = 1 WHERE id = ?;`, [msg.id], (err, result, fields) => {
     if (err) console.log(err);
     else console.log(`${msg.author.username + "#" + msg.author.discriminator} deleted their message with content "${msg.content}".`);
   });
