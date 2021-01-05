@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS discord;
+CREATE DATABASE discord DEFAULT CHARACTER SET = utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE discord;
 
 DROP TABLE IF EXISTS messages, users, channels, guilds;
@@ -38,4 +38,4 @@ CREATE TABLE messages(
   channel_id VARCHAR(18) NOT NULL,
   deleted TINYINT(1) NOT NULL DEFAULT 0,
   FOREIGN KEY (channel_id) REFERENCES channels(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET = utf8mb4 COLLATE utf8mb4_unicode_ci;

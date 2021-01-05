@@ -28,7 +28,7 @@ async function getall(channel) {
       for (let i = 0; i < messages.array().length; i++) if (messages.array()[i] !== undefined) {
         // Construct and push the message object.
         sum_messages.push(new Message(
-          messages.array()[i].id, messages.array()[i].content.replace(/[^\x00-\x7F]/g, ""), messages.array()[i].pinned,
+          messages.array()[i].id, messages.array()[i].content, messages.array()[i].pinned,
           messages.array()[i].createdTimestamp, messages.array()[i].author.id, messages.array()[i].channel.id
         ));
       }

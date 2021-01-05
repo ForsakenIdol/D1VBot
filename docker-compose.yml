@@ -21,6 +21,8 @@ services:
     volumes:
       # This allows us to initialize a database from a dump on container load.
       - ./dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      # This specifies the configuration files.
+      - ./conf.d:/etc/mysql/conf.d
     restart: always
     env_file:
       - db.env

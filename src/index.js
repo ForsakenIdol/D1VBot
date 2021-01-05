@@ -44,7 +44,7 @@ client.on('ready', () => {
         guild.members.fetch().then(members => {
           members.forEach(member => {
             const user = member.user;
-            db.query("INSERT INTO users VALUES(?, ?, ?, ?);", [user.id, user.username.replace(/[^\x00-\x7F]/g, ""), user.bot ? 1 : 0, user.discriminator], (users_err, result, fields) => {
+            db.query("INSERT INTO users VALUES(?, ?, ?, ?);", [user.id, user.username, user.bot ? 1 : 0, user.discriminator], (users_err, result, fields) => {
               if (users_err) throw new Error(users_err);
             })
           });
@@ -73,7 +73,10 @@ client.on('ready', () => {
                       [message.id, message.content, message.pinned,
                       Discord.SnowflakeUtil.deconstruct(message.createdTimestamp.toString(10)).date,
                       message.user_id, message.channel_id], (err, result, fields) => {
-                        if (err) throw new Error(err);
+                        if (err) {
+                          console.log(err.sql);
+                          throw new Error(err);
+                        }
                       }
                     );
                   });
@@ -90,7 +93,6 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
-
   // First, add this message to the database.
   db.query("INSERT INTO messages(id, content, pinned, createdTimestamp, user_id, channel_id) VALUES(?, ?, ?, ?, ?, ?)",
            [msg.id, msg.content, msg.pinned ? 1 : 0, 
@@ -119,7 +121,8 @@ client.on('message', msg => {
           // Clear the last 'numDelete' messages
           msg.channel.bulkDelete(numDelete).then(deletedMessages => {
             deletedMessages.forEach(message => {
-              db.query(`UPDATE messages SET deleted=1 WHERE id='${message.id}';`, (err, result, fields) => {
+              console.log(message);
+              db.query(`UPDATE messages SET deleted=1 WHERE id='?';`, [message.id], (err, result, fields) => {
                 if (err) {
                   console.log(err);
                   console.log(`Could not delete message with content ${message.content}.`);
@@ -140,12 +143,19 @@ client.on('message', msg => {
           setTimeout(() => {client.destroy();}, 1000);
         }
       case 'ping':
-        msg.channel.send(`:ping_pong: Bot latency is ${msg.createdTimestamp - Date.now()}ms. API latency is ${client.ws.ping}ms.`);
+        msg.channel.send(`:ping_pong: Bot latency is ${Math.abs(msg.createdTimestamp - Date.now())}ms. API latency is ${client.ws.ping}ms.`);
         break;
       default:
         break;
     }
   }
+});
+
+client.on('messageDelete', msg => {
+  db.query(`UPDATE messages SET deleted = 1 WHERE id = '?';`, [msg.id], (err, result, fields) => {
+    if (err) console.log(err);
+    else console.log(`${msg.author.username + "#" + msg.author.discriminator} deleted their message with content "${msg.content}".`);
+  });
 });
 
 // This promise resolves with the bot's API token - do not log this!
