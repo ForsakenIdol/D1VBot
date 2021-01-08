@@ -1,7 +1,13 @@
+SELECT '==================== Initializing Database ====================';
+
 CREATE DATABASE discord;
 USE discord;
 
 DROP TABLE IF EXISTS messages, users, channels, guilds;
+
+/* Table Creation */
+
+SELECT '==================== Creating Tables ====================';
 
 CREATE TABLE users(
   id VARCHAR(18) PRIMARY KEY NOT NULL CHECK (CHAR_LENGTH(id) = 18),
@@ -34,8 +40,15 @@ CREATE TABLE messages(
   content TEXT,
   pinned TINYINT(1) NOT NULL,
   createdTimestamp DATETIME NOT NULL,
-  user_id VARCHAR(18) NULL,
+  user_id VARCHAR(18) NOT NULL,
   channel_id VARCHAR(18) NOT NULL,
   deleted TINYINT(1) NOT NULL DEFAULT 0,
   FOREIGN KEY (channel_id) REFERENCES channels(id)
 );
+
+CREATE VIEW total_messages AS
+SELECT user_id, guild_id, channel_id,
+COUNT(*) AS num_messages_all, COUNT(IF(messages.deleted = 1, NULL, 0)) AS num_messages_count
+FROM messages JOIN channels ON messages.channel_id = channels.id
+GROUP BY user_id, guild_id, channel_id
+ORDER BY COUNT(*) DESC;

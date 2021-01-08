@@ -44,7 +44,8 @@ client.on('ready', () => {
         guild.members.fetch().then(members => {
           members.forEach(member => {
             const user = member.user;
-            db.query("INSERT INTO users VALUES(?, ?, ?, ?);", [user.id, user.username, user.bot ? 1 : 0, user.discriminator], (users_err, result, fields) => {
+            db.query("INSERT INTO users(id, username, bot, discriminator) VALUES(?, ?, ?, ?);",
+            [user.id, user.username, user.bot ? 1 : 0, user.discriminator], (users_err, result, fields) => {
               if (users_err) throw new Error(users_err);
             })
           });
@@ -145,6 +146,23 @@ client.on('message', msg => {
       case 'ping':
         msg.channel.send(`:ping_pong: Bot latency is ${Math.abs(msg.createdTimestamp - Date.now())}ms. API latency is ${client.ws.ping}ms.`);
         break;
+      case 'whoami':
+        if (components.length != 1) msg.channel.send(`Usage: \`${prefix}whoami\` without command arguments.`);
+        else msg.channel.send(`Detected user \`${msg.author.username}\` with discriminator \`${msg.author.discriminator}\` and user ID \`${msg.author.id}\`.`);
+        break;
+      case 'stats':
+        if (components.length == 1) {
+          // User self-requested stats.
+          msg.channel.send(`<@!${msg.author.id}> requested stats on themselves. Coming soon.`);
+        } else if (components.length == 2) { // Whitespace is stripped, so the second component can never be empty.
+          if (components[1] == msg.author.id) msg.channel.send(`<@!${msg.author.id}> requested stats on themselves. Coming soon.`);
+          else if (components[1].length != 18 || !/^\d+$/.test(components[1])) msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
+          else {
+            // User requested stats on another user. Can only provide the user ID.
+            msg.channel.send(`<@!${msg.author.id}> requested stats on user <@!${components[1]}>. Coming soon.`);
+          }
+        } else msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
+        break;
       default:
         break;
     }
@@ -169,7 +187,7 @@ client.on('userUpdate', (oldUser, newUser) => {
 });
 
 client.on('guildMemberAdd', member => {
-  db.query("INSERT INTO users VALUES(?, ?, ?, ?);",
+  db.query("INSERT INTO users(id, username, bot, discriminator) VALUES(?, ?, ?, ?);",
            [member.id, member.user.username, member.user.bot ? 1 : 0, member.user.discriminator], (err, result, fields) => {
               if (err) throw new Error(err);
               else console.log(`User ${member.user.username}#${member.user.discriminator} has joined the guild and has been added to the database!`);

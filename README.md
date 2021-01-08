@@ -17,6 +17,10 @@ Orders users by the number of messages they have sent in **all** channels; expos
 Orders users by the number of messages they have sent in **all** channels; exposes the username and unique user ID. Does not include deleted messages. Does not include users who have not sent any messages.
 
 - `SELECT CONCAT(users.username, '#', users.discriminator) AS Username, users.id AS 'User ID', messages.content FROM users JOIN messages ON messages.user_id = users.id WHERE messages.deleted = 0 AND users.id = '309501599313821708';`
+Selects all of my messages (ForsakenIdol)
 
 - `SELECT messages.id AS 'Message ID', messages.content, users.id AS 'User ID', CONCAT(users.username, '#', users.discriminator) AS 'Username', channels.name AS 'Channel' FROM users JOIN messages JOIN channels ON users.id = messages.user_id AND messages.channel_id = channels.id LIMIT 10;`
 Performs a `JOIN` on 3 different tables.
+
+- `SELECT user_id, guild_id, channel_id, COUNT(*) AS num_messages_all, COUNT(IF(messages.deleted = 1, NULL, 0)) AS num_messages_count FROM messages JOIN channels ON messages.channel_id = channels.id GROUP BY user_id, guild_id, channel_id ORDER BY COUNT(*) DESC;`
+Replicates trigger behaviour to keep track of the number of messages users have sent per guild and per channel.

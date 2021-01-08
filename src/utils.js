@@ -6,6 +6,8 @@ const prefix = "--";
 const help_message = `\
 Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me include:
 - \`${prefix}ping\`: Gets the bot's local and API ping.
+- \`${prefix}help\`: Displays this message.
+- \`${prefix}whoami\`: Displays key user statistics about yourself. Useful for coding.
 - \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in. **Admin Command**.
 - \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
 `
