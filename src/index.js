@@ -194,13 +194,6 @@ client.on('guildMemberAdd', member => {
   });
 });
 
-client.on('guildMemberRemove', member => {
-  db.query("DELETE FROM users WHERE id = ?;", [member.id], (err, result, fields) => {
-    if (err) throw new Error(err);
-    else console.log(`User ${member.user.username}#${member.user.discriminator}  has left the guild and has been removed from the database.`);
-  })
-});
-
 client.on('guildUpdate', (oldGuild, newGuild) => {
   db.query("UPDATE guilds SET name = ? AND acronym = ? AND owner_id = ? WHERE id = ?;",
            [newGuild.name, newGuild.nameAcronym, newGuild.ownerID], (err, result, fields) => {

@@ -19,5 +19,5 @@ Orders users by the number of messages they have sent in **all** channels; expos
 - `SELECT user_id, guild_id, channel_id, COUNT(*) AS num_messages_all, COUNT(IF(messages.deleted = 1, NULL, 0)) AS num_messages_count FROM messages JOIN channels ON messages.channel_id = channels.id GROUP BY user_id, guild_id, channel_id ORDER BY COUNT(*) DESC;`
 Replicates trigger behaviour to keep track of the number of messages users have sent per guild and per channel.
 
-- `SET @num := 1; SELECT @num := @num + 1 AS row_num, user_id, guild_id, channel_id, num_messages_all, num_messages_count FROM total_messages;`
+- `SET @num := 0; SELECT @num := @num + 1 AS row_num, user_id, guild_id, channel_id, num_messages_all, num_messages_count FROM total_messages;`
 Adds the row number in with the rest of the rows from the view.
