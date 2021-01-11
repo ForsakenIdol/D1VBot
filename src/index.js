@@ -1,13 +1,5 @@
-const { Discord, mysql, getall, prefix, help_message } = require("./utils");
+const { Discord, mysql, getall, getStats, db, prefix, help_message } = require("./utils");
 const { Guild, User, Channel, Message } = require("./datatypes");
-
-const db = mysql.createConnection({
-  host: process.env.DBHOST,
-  user: process.env.DBUSERNAME,
-  password: process.env.DBPASSWORD,
-  database: process.env.DBNAME,
-  port: process.env.DBPORT
-});
 
 const client = new Discord.Client();
 const admins = [
@@ -122,7 +114,6 @@ client.on('message', msg => {
           // Clear the last 'numDelete' messages
           msg.channel.bulkDelete(numDelete).then(deletedMessages => {
             deletedMessages.forEach(message => {
-              console.log(message);
               db.query(`UPDATE messages SET deleted=1 WHERE id=?;`, [message.id], (err, result, fields) => {
                 if (err) {
                   console.log(err);
@@ -151,16 +142,11 @@ client.on('message', msg => {
         else msg.channel.send(`Detected user \`${msg.author.username}\` with discriminator \`${msg.author.discriminator}\` and user ID \`${msg.author.id}\`.`);
         break;
       case 'stats':
-        if (components.length == 1) {
-          // User self-requested stats.
-          msg.channel.send(`<@!${msg.author.id}> requested stats on themselves. Coming soon.`);
-        } else if (components.length == 2) { // Whitespace is stripped, so the second component can never be empty.
-          if (components[1] == msg.author.id) msg.channel.send(`<@!${msg.author.id}> requested stats on themselves. Coming soon.`);
+        if (components.length == 1) getStats(msg.author.id, msg); // User self-requested stats.
+        else if (components.length == 2) { // Whitespace is stripped, so the second component can never be empty.
+          if (components[1] == msg.author.id) getStats(msg.author.id, msg); // Another way to self-request stats.
           else if (components[1].length != 18 || !/^\d+$/.test(components[1])) msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
-          else {
-            // User requested stats on another user. Can only provide the user ID.
-            msg.channel.send(`<@!${msg.author.id}> requested stats on user <@!${components[1]}>. Coming soon.`);
-          }
+          else getStats(components[1], msg);
         } else msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
         break;
       default:

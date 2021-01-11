@@ -12,6 +12,15 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 - \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
 `
 
+const db = mysql.createConnection({
+  host: process.env.DBHOST,
+  user: process.env.DBUSERNAME,
+  password: process.env.DBPASSWORD,
+  database: process.env.DBNAME,
+  port: process.env.DBPORT,
+  multipleStatements: true
+});
+
 async function getall(channel) {
   //const limit = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
   const limit = 1000;
@@ -43,4 +52,30 @@ async function getall(channel) {
   }
 } 
 
-module.exports = { Discord, mysql, getall, prefix, help_message }
+const getStats = (user_id, msg) => {
+  let stats_message = "";
+  db.query("SELECT * FROM total_messages;", (err, result, fields) => {
+    if (err) console.log(err);
+    else {
+      // Find the rank of this user
+      let found = false;
+      for (let i = 0; i < result.length; i++) {
+        if (result[i].user_id === user_id) {
+          stats_message += `<@${user_id}> has sent ${result[i].total_messages} out of the last ${result[0].total_messages} messages across all channels in ${msg.channel.guild.name}, placing them at rank ${i} out of ${result.length}.\n`;
+          found = true;
+          break;
+        }
+      } if (!found) stats_message += `<@${user_id}> has not sent any messages yet out of the last 1000 messages in ${msg.channel.guild.name}.\n`;
+      db.query("SELECT C.name, M.num_messages_count FROM messages_per_channel M JOIN channels C ON M.channel_id = C.id WHERE user_id = ? ORDER BY num_messages_count DESC;", [user_id], (err, result, fields) => {
+        if (err) console.log(err);
+        else {
+          stats_message += "**Breakdown per Channel**\n";
+          for (let i = 0; i < result.length; i++) stats_message += `- ${msg.guild.channels.cache.find(channel => channel.name === result[i].name).toString()}: ${result[i].num_messages_count} messages.\n`;
+          msg.channel.send(stats_message);
+        }
+      });
+    }
+  });
+}
+
+module.exports = { Discord, mysql, getall, getStats, db, prefix, help_message }

@@ -21,3 +21,6 @@ Replicates trigger behaviour to keep track of the number of messages users have 
 
 - `SET @num := 0; SELECT @num := @num + 1 AS row_num, user_id, guild_id, channel_id, num_messages_all, num_messages_count FROM total_messages;`
 Adds the row number in with the rest of the rows from the view.
+
+- `SELECT messages.user_id,  COUNT(messages.id) AS total_messages FROM messages JOIN channels JOIN guilds ON messages.channel_id = channels.id AND channels.guild_id = guilds.id WHERE guilds.id = '288972817796694016' GROUP BY user_id ORDER BY total_messages DESC;`
+Generates a leaderboard as above but this time using messages from ALL channels in the guild 'Aesthetics'.

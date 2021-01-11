@@ -46,9 +46,20 @@ CREATE TABLE messages(
   FOREIGN KEY (channel_id) REFERENCES channels(id)
 );
 
-CREATE VIEW total_messages AS
+/* Create Views */
+
+CREATE VIEW messages_per_channel AS
 SELECT user_id, guild_id, channel_id,
 COUNT(*) AS num_messages_all, COUNT(IF(messages.deleted = 1, NULL, 0)) AS num_messages_count
 FROM messages JOIN channels ON messages.channel_id = channels.id
 GROUP BY user_id, guild_id, channel_id
 ORDER BY COUNT(*) DESC;
+
+-- This view is currently hardcoded to the Aesthetics guild.
+CREATE VIEW total_messages AS
+SELECT messages.user_id,  COUNT(messages.id) AS total_messages
+FROM messages JOIN channels JOIN guilds
+ON messages.channel_id = channels.id AND channels.guild_id = guilds.id
+WHERE guilds.id = '288972817796694016'
+GROUP BY user_id WITH ROLLUP
+ORDER BY total_messages DESC;
