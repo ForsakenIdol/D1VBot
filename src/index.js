@@ -174,6 +174,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           for (let i = 0; i < num_pings; i++) ping_wall += `<@${msg.author.id}> `;
           msg.channel.send(ping_wall);
         }
+        break;
       case 'prefix':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
         else if (components.length != 2) msg.channel.send(`Usage: \`${prefix}prefix <new>\` to change to a new prefix. The new prefix must only consist of symbols.`);
