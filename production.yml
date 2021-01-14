@@ -1,23 +1,18 @@
-# This file details the development container system for D1VBot.
-# Refer to the production.yml docker-compose file for the production setup.
-# This file can be simply run with docker-compose up.
+# This is the production file for docker-compose.
+# This file must be run with docker-compose -f production.yml up.
+# Add the -d flag to make it execute in the background, i.e. Detached mode.
 
 version: '3.8'
 
 services:
   bot:
     container_name: d1vbot
-    build:
-      context: .
-    image: d1vbot:1.0.0
-    volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+    image: forsakenidol/d1vbot:1.0.0
     restart: always
-    command: ["nodemon", "-L", "src/index.js"]
+    command: ["node", "src/index.js"]
     depends_on:
       - db
-    env_file: 
+    env_file:
         - config.env
   db:
     container_name: discord_db
