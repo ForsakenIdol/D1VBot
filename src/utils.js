@@ -8,6 +8,9 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 - \`${prefix}ping\`: Gets the bot's local and API ping.
 - \`${prefix}help\`: Displays this message.
 - \`${prefix}whoami\`: Displays key user statistics about yourself. Useful for coding.
+- \`${prefix}stats\`: Get message stats about yourself.
+- \`${prefix}stats <id>\`: Get message stats about another user using their ID. I WILL restrict this if people abuse it.
+- \`${prefix}wallofdeath\`: ...just why? For those who truly wish to drown.
 - \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in. **Admin Command**.
 - \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
 `
@@ -61,7 +64,9 @@ const getStats = (user_id, msg) => {
       let found = false;
       for (let i = 0; i < result.length; i++) {
         if (result[i].user_id === user_id) {
-          stats_message += `<@${user_id}> has sent ${result[i].total_messages} out of the last ${result[0].total_messages} messages across all channels in ${msg.channel.guild.name}, placing them at rank ${i} out of ${result.length}.\n`;
+          if (user_id == '793858225878990879') stats_message += `<@${user_id}> (hey that's me!)`; // This is D1VBot's user ID.
+          else stats_message += `<@${user_id}>`;
+          stats_message += ` has sent ${result[i].total_messages} out of the last ${result[0].total_messages} messages across all channels in ${msg.channel.guild.name}, placing them at rank ${i} out of ${result.length}.\n`;
           found = true;
           break;
         }

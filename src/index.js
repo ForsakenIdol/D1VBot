@@ -86,6 +86,9 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
+
+  console.log(`[${Date.now()}] ${msg.author.username}#${msg.author.discriminator} sent '${msg.content}'.`);
+
   // First, add this message to the database.
   db.query("INSERT INTO messages(id, content, pinned, createdTimestamp, user_id, channel_id) VALUES(?, ?, ?, ?, ?, ?)",
            [msg.id, msg.content, msg.pinned ? 1 : 0, 
@@ -149,6 +152,15 @@ client.on('message', msg => {
           else getStats(components[1], msg);
         } else msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
         break;
+      case 'wallofdeath':
+        if (!(components.length == 2 && !isNaN(components[1]) && parseInt(components[1]) > 0)) msg.channel.send("**YOU DARE FACE THE WALL OF DEATH WITHOUT KNOWING HOW TO CALL IT?!**");
+        else {
+          // Get how many pings this user wants
+          let num_pings = parseInt(components[1]);
+          let ping_wall = "";
+          for (let i = 0; i < num_pings; i++) ping_wall += `<@${msg.author.id}> `;
+          msg.channel.send(ping_wall);
+        }
       default:
         break;
     }
