@@ -1,4 +1,4 @@
-const { Discord, mysql, getall, getStats, db, prefix, help_message } = require("./utils");
+const { Discord, mysql, getall, getStats, db } = require("./utils");
 const { Guild, User, Channel, Message } = require("./datatypes");
 
 const client = new Discord.Client();
@@ -6,9 +6,10 @@ const admins = [
   '199792741058609153', /* ELL1, ARE3 */
   '309501599313821708' /* ForsakenIdol */
 ]
+let prefix = process.env.PREFIX;
 
 client.on('ready', () => {
-  console.log(`\nLogged in as ${client.user.tag}!`);
+  console.log(`\nLogged in as ${client.user.tag}! My prefix is '${prefix}'.`);
   client.user.setPresence({ status: "online", activity: { name: `Type ${prefix}help for help with commands!` } });
   // Initialize MySQL connection
   db.connect(err => {
@@ -55,7 +56,7 @@ client.on('ready', () => {
             db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
               if (err) {console.log(channel.type); throw new Error(err);}
               // If there is no error, scrape each channel and insert the messages into the database
-              else getall(channel)
+              else getall(channel, Math.floor(Number.MAX_SAFE_INTEGER / 10000))
               .then(messages => {
                 // Handle messages here
                 if (messages === null) console.log(`Skipped non-text channel ${channel.name}!`);
@@ -100,10 +101,22 @@ client.on('message', msg => {
   // Then, check if the message called a command.
   if (msg.content.startsWith(prefix)) {
     const components = msg.content.split(' ');
-    components[0] = components[0].replace("--", "");
+    components[0] = components[0].replace(prefix, "");
     console.log(components);
     switch (components[0].toLowerCase()) {
       case 'help':
+        let help_message = `\
+Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me include:
+- \`${prefix}ping\`: Gets the bot's local and API ping.
+- \`${prefix}help\`: Displays this message.
+- \`${prefix}whoami\`: Displays key user statistics about yourself. Useful for coding.
+- \`${prefix}stats\`: Get message stats about yourself.
+- \`${prefix}stats <id>\`: Get message stats about another user using their ID. I WILL restrict this if people abuse it.
+- \`${prefix}wallofdeath\`: ...just why? For those who truly wish to drown.
+- \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in. **Admin Command**.
+- \`${prefix}prefix <new>\`: Changes the bot's prefix. **Admin Command**.
+- \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
+`
         msg.channel.send(help_message);
         break;
       // Removes any number of messages from this channel.
@@ -160,6 +173,15 @@ client.on('message', msg => {
           let ping_wall = "";
           for (let i = 0; i < num_pings; i++) ping_wall += `<@${msg.author.id}> `;
           msg.channel.send(ping_wall);
+        }
+      case 'prefix':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2) msg.channel.send(`Usage: \`${prefix}prefix <new>\` to change to a new prefix. The new prefix must only consist of symbols.`);
+        else if (!/[`~!@#$%^&*_=+\|\-\(\)\{\}\[\]<>;:'",<>]{1,3}/.test(components[1])) msg.channel.send("New prefix is invalid.");
+        else {
+          let oldprefix = process.env.PREFIX;
+          prefix = components[1]; process.env.PREFIX = components[1];
+          msg.channel.send(`Successfully changed D1VBot's prefix from \`${oldprefix}\` to \`${prefix}\`.`);
         }
       default:
         break;

@@ -2,19 +2,6 @@ const Discord = require('discord.js');
 const mysql = require('mysql');
 const { Message } = require("./datatypes");
 
-const prefix = "--";
-const help_message = `\
-Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me include:
-- \`${prefix}ping\`: Gets the bot's local and API ping.
-- \`${prefix}help\`: Displays this message.
-- \`${prefix}whoami\`: Displays key user statistics about yourself. Useful for coding.
-- \`${prefix}stats\`: Get message stats about yourself.
-- \`${prefix}stats <id>\`: Get message stats about another user using their ID. I WILL restrict this if people abuse it.
-- \`${prefix}wallofdeath\`: ...just why? For those who truly wish to drown.
-- \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in. **Admin Command**.
-- \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
-`
-
 const db = mysql.createConnection({
   host: process.env.DBHOST,
   user: process.env.DBUSERNAME,
@@ -24,9 +11,7 @@ const db = mysql.createConnection({
   multipleStatements: true
 });
 
-async function getall(channel) {
-  //const limit = Math.floor(Number.MAX_SAFE_INTEGER / 10000);
-  const limit = 1000;
+async function getall(channel, limit) {
 
   if (!["dm", "text", "news"].includes(channel.type)) return null; // Skip all non-text channels
   let sum_messages = [];
@@ -83,4 +68,4 @@ const getStats = (user_id, msg) => {
   });
 }
 
-module.exports = { Discord, mysql, getall, getStats, db, prefix, help_message }
+module.exports = { Discord, mysql, getall, getStats, db }
