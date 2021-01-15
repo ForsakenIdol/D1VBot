@@ -28,3 +28,5 @@ Generates a leaderboard as above but this time using messages from ALL channels 
 ## TODO
 
 - Add a default number to the `wallofdeath` command. If a user enters `--wallofdeath` (assuming the default prefix), it should still work.
+- Add an upper limit to the number of pings the `wallofdeath` command can spawn in a single message, maybe 100. If a user enters more, it sends "**The wall is too large for you. Try a smaller number!**"
+- Add a negative value check. On negative number input, the bot will send "**What the fuck is a negative sized wall anyway?**"
