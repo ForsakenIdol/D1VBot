@@ -24,3 +24,7 @@ Adds the row number in with the rest of the rows from the view.
 
 - `SELECT messages.user_id,  COUNT(messages.id) AS total_messages FROM messages JOIN channels JOIN guilds ON messages.channel_id = channels.id AND channels.guild_id = guilds.id WHERE guilds.id = '288972817796694016' GROUP BY user_id ORDER BY total_messages DESC;`
 Generates a leaderboard as above but this time using messages from ALL channels in the guild 'Aesthetics'.
+
+## TODO
+
+- Add a default number to the `wallofdeath` command. If a user enters `--wallofdeath` (assuming the default prefix), it should still work.
