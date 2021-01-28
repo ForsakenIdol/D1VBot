@@ -197,13 +197,24 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
       case 'purge':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
         else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}purge\`.`);
-        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to purge yourself, <@${msg.author.id}>!`);
+        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
         else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
         else {
           cleanUser(components[1], msg);
-          msg.guild.members.ban(components[1])
-          .then(user => msg.channel.send(`${user.id}:${user.discriminator} has been purged from ${msg.guild.name}.`))
+          msg.guild.members.fetch(components[1])
+          .then(guildUser => {
+            guildUser.kick("Purge command called on user.").then(() => {
+              msg.channel.send(`${guildUser.user.username}:${guildUser.user.discriminator} has been purged from ${msg.guild.name}.`)
+            });
+          })
           .catch(error => console.log(error));
+        }
+      case 'silence':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}purge\`.`);
+        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
+        else {
+          console.log(`Silence called by <@${msg.author.id}>. Implementation soon.`);
         }
       default:
         break;
