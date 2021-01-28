@@ -200,7 +200,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         else {
           cleanUser(components[1], msg);
           msg.guild.members.ban(components[1])
-          .then(user => msg.channel.send(`${user.id}:${user.discriminator} has been banned from ${msg.guild.name}.`))
+          .then(user => msg.channel.send(`${user.id}:${user.discriminator} has been purged from ${msg.guild.name}.`))
           .catch(error => console.log(error));
         }
       default:
