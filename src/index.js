@@ -56,7 +56,7 @@ client.on('ready', () => {
             db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
               if (err) {console.log(channel.type); throw new Error(err);}
               // If there is no error, scrape each channel and insert the messages into the database
-              else getall(channel, 1000) // Math.floor(Number.MAX_SAFE_INTEGER / 10000)
+              else getall(channel, Math.floor(Number.MAX_SAFE_INTEGER / 10000))
               .then(messages => {
                 // Handle messages here
                 if (messages === null) console.log(`Skipped non-text channel ${channel.name}!`);
