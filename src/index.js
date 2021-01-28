@@ -117,7 +117,10 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 - \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in.
 - \`${prefix}prefix <new>\`: Changes the bot's prefix.
 - \`${prefix}shutdown\`: Gracefully terminates the bot.
-- \`${prefix}clean <id>\`: Removes all messages sent by a user in this guild. 
+- \`${prefix}clean <id>\`: Removes all messages sent by a user in this guild.
+- \`${prefix}purge <id>\`: Purges a user. Removes all their messages and kicks them from the guild.
+- \`${prefix}silence <id>\`: Mutes a user in all voice and text channels.
+- \`${prefix}vocalize <id>\`: Unmutes a user in all voice and text channels.
 `
         msg.channel.send(help_message);
         break;
@@ -204,18 +207,37 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           msg.guild.members.fetch(components[1])
           .then(guildUser => {
             guildUser.kick("Purge command called on user.").then(() => {
-              msg.channel.send(`${guildUser.user.username}:${guildUser.user.discriminator} has been purged from ${msg.guild.name}.`)
+              msg.channel.send(`${guildUser.user.username}#${guildUser.user.discriminator} has been purged from ${msg.guild.name}.`)
             });
           })
           .catch(error => console.log(error));
         }
+        break;
       case 'silence':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
-        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}purge\`.`);
+        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}silence\`.`);
         else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
+        else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
         else {
-          console.log(`Silence called by <@${msg.author.id}>. Implementation soon.`);
+          msg.guild.members.fetch(components[1]).then(member => {
+            let mutedRoles = msg.guild.roles.cache.filter(role => role.name === "Silenced").array();
+            console.log([mutedRoles]);
+            member.roles.set(mutedRoles);
+            msg.channel.send(`You have been silenced, <@${components[1]}>. Do not attempt to resist.`);
+          }).catch(error => console.log(error));
         }
+        break;
+      case 'vocalize':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}vocalize\`.`);
+        else {
+          msg.guild.members.fetch(components[1]).then(member => {
+            member.roles.remove(msg.guild.roles.cache.filter(role => role.name === "Silenced").array()[0]);
+            member.roles.add(msg.guild.roles.cache.filter(role => role.name === "Witness").array()[0]);
+            msg.channel.send(`<@${components[1]}> has been vocalized!`);
+          }).catch(error => console.log(error));
+        }
+        break;
       default:
         break;
     }
