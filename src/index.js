@@ -193,6 +193,16 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         else if (components[1] == msg.author.id) msg.channel.send(`Don't try to clear out your own messages, <@${msg.author.id}>!`);
         else cleanUser(components[1], msg);
         break;
+      case 'purge':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}purge\`.`);
+        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to purge yourself, <@${msg.author.id}>!`);
+        else {
+          cleanUser(components[1], msg);
+          msg.guild.members.ban(components[1])
+          .then(user => msg.channel.send(`${user.id}:${user.discriminator} has been banned from ${msg.guild.name}.`))
+          .catch(error => console.log(error));
+        }
       default:
         break;
     }
