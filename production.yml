@@ -7,7 +7,7 @@ version: '3.8'
 services:
   bot:
     container_name: d1vbot
-    image: forsakenidol/d1vbot:1.0.0
+    image: forsakenidol/d1vbot:1.1.0
     restart: always
     command: ["node", "src/index.js"]
     depends_on:
