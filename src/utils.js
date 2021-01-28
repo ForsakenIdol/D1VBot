@@ -68,4 +68,28 @@ const getStats = (user_id, msg) => {
   });
 }
 
-module.exports = { Discord, mysql, getall, getStats, db }
+const cleanUser = (user_id, msg) => {
+  db.query("SELECT id FROM messages WHERE user_id = ?;", [user_id], (err, result, fields) => {
+    if (err) console.log(err);
+    else {
+      let channels = msg.guild.channels.cache.array().filter(channel => ["dm", "text", "news"].includes(channel.type));
+      for (let i = 0; i < result.length; i++) { // For each message
+        new Promise((resolve, reject) => {
+          channels.forEach(channel => {
+            channel.messages.fetch(result[i].id).then(message => {
+              // Delete the message in both the channel and the database.
+              message.delete();
+              db.query("UPDATE messages SET deleted = 1 WHERE id = ?;", [message.id], (delete_err, delete_result, delete_fields) => {
+                if (delete_err) console.log(err);
+                else resolve(message);
+              });
+            }).catch(error => {if (error.code != 10008) console.log(error);});
+          });
+        }).then(message => console.log(`Successfully deleted message with content "${message.content}".`));
+      }
+      console.log(channels.length);
+    }
+  });
+}
+
+module.exports = { Discord, mysql, getall, getStats, cleanUser, db }

@@ -1,4 +1,4 @@
-const { Discord, mysql, getall, getStats, db } = require("./utils");
+const { Discord, mysql, getall, getStats, cleanUser, db } = require("./utils");
 const { Guild, User, Channel, Message } = require("./datatypes");
 
 const client = new Discord.Client();
@@ -56,7 +56,7 @@ client.on('ready', () => {
             db.query("INSERT INTO channels VALUES(?, ?, ?, ?);", [channel.id, channel.name, channel.type, guild.id], (err, result, fields) => {
               if (err) {console.log(channel.type); throw new Error(err);}
               // If there is no error, scrape each channel and insert the messages into the database
-              else getall(channel, Math.floor(Number.MAX_SAFE_INTEGER / 10000))
+              else getall(channel, 1000) // Math.floor(Number.MAX_SAFE_INTEGER / 10000)
               .then(messages => {
                 // Handle messages here
                 if (messages === null) console.log(`Skipped non-text channel ${channel.name}!`);
@@ -113,9 +113,11 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 - \`${prefix}stats\`: Get message stats about yourself.
 - \`${prefix}stats <id>\`: Get message stats about another user using their ID. I WILL restrict this if people abuse it.
 - \`${prefix}wallofdeath\`: ...just why? For those who truly wish to drown.
-- \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in. **Admin Command**.
-- \`${prefix}prefix <new>\`: Changes the bot's prefix. **Admin Command**.
-- \`${prefix}shutdown\`: Gracefully terminates the bot. **Admin Command**.
+**Admin Commands**
+- \`${prefix}rm <num>\`: Removes \`num\` messages from the channel it was called in.
+- \`${prefix}prefix <new>\`: Changes the bot's prefix.
+- \`${prefix}shutdown\`: Gracefully terminates the bot.
+- \`${prefix}clean <id>\`: Removes all messages sent by a user in this guild. 
 `
         msg.channel.send(help_message);
         break;
@@ -150,6 +152,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           msg.channel.send("Shutting down D1VBot... Goodbye.");
           setTimeout(() => {client.destroy();}, 1000);
         }
+        break;
       case 'ping':
         msg.channel.send(`:ping_pong: Bot latency is ${Math.abs(msg.createdTimestamp - Date.now())}ms. API latency is ${client.ws.ping}ms.`);
         break;
@@ -184,6 +187,12 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           prefix = components[1]; process.env.PREFIX = components[1];
           msg.channel.send(`Successfully changed D1VBot's prefix from \`${oldprefix}\` to \`${prefix}\`.`);
         }
+      case 'clean':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}clean\`.`);
+        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to clear out your own messages, <@${msg.author.id}>!`);
+        else cleanUser(components[1], msg);
+        break;
       default:
         break;
     }
@@ -193,7 +202,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 client.on('messageDelete', msg => {
   db.query(`UPDATE messages SET deleted = 1 WHERE id = ?;`, [msg.id], (err, result, fields) => {
     if (err) console.log(err);
-    else console.log(`${msg.author.username + "#" + msg.author.discriminator} deleted their message with content "${msg.content}".`);
+    else console.log(`${msg.author.username + "#" + msg.author.discriminator}'s message with content "${msg.content}" was deleted.`);
   });
 });
 

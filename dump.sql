@@ -60,6 +60,6 @@ CREATE VIEW total_messages AS
 SELECT messages.user_id,  COUNT(messages.id) AS total_messages
 FROM messages JOIN channels JOIN guilds
 ON messages.channel_id = channels.id AND channels.guild_id = guilds.id
-WHERE guilds.id = '288972817796694016'
+WHERE guilds.id = '288972817796694016' AND deleted = 0
 GROUP BY user_id WITH ROLLUP
 ORDER BY total_messages DESC;
