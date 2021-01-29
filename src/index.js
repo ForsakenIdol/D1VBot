@@ -6,6 +6,7 @@ const admins = [
   '199792741058609153', /* ELL1, ARE3 */
   '309501599313821708' /* ForsakenIdol */
 ]
+let deleteOnView = [];
 let prefix = process.env.PREFIX;
 
 client.on('ready', () => {
@@ -98,6 +99,13 @@ client.on('message', msg => {
     if (err) console.log(err);
   });
 
+  // Then, check if this message was sent by an oppressed user.
+  if (deleteOnView.includes(msg.author.id)) {
+    msg.delete({ timeout: 500, reason: "Deleted on view." });
+    console.log(`${msg.author.username}#${msg.author.discriminator} is on the delete-on-view list. Deleted their message.`);
+    return;
+  }
+
   // Then, check if the message called a command.
   if (msg.content.startsWith(prefix)) {
     const components = msg.content.split(' ');
@@ -121,6 +129,8 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
 - \`${prefix}purge <id>\`: Purges a user. Removes all their messages and kicks them from the guild.
 - \`${prefix}silence <id>\`: Mutes a user in all voice and text channels.
 - \`${prefix}vocalize <id>\`: Unmutes a user in all voice and text channels.
+- \`${prefix}oppress <id>\`: Demonstrates the effects of oppression on one poor user.
+- \`${prefix}depress <id>\`: User feeling oppressed? Reverse those effects today!
 `
         msg.channel.send(help_message);
         break;
@@ -167,7 +177,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         if (components.length == 1) getStats(msg.author.id, msg); // User self-requested stats.
         else if (components.length == 2) { // Whitespace is stripped, so the second component can never be empty.
           if (components[1] == msg.author.id) getStats(msg.author.id, msg); // Another way to self-request stats.
-          else if (components[1].length != 18 || !/^\d+$/.test(components[1])) msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
+          else if (components[1].length != 18 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
           else getStats(components[1], msg);
         } else msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
         break;
@@ -192,14 +202,14 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         }
       case 'clean':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
-        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}clean\`.`);
+        else if (components.length != 2 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Incorrect usage of \`${prefix}clean\`.`);
         else if (components[1] == msg.author.id) msg.channel.send(`Don't try to clear out your own messages, <@${msg.author.id}>!`);
         else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
         else cleanUser(components[1], msg);
         break;
       case 'purge':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
-        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}purge\`.`);
+        else if (components.length != 2 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Incorrect usage of \`${prefix}${components[0].toLowerCase()}\`.`);
         else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
         else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
         else {
@@ -215,7 +225,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         break;
       case 'silence':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
-        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}silence\`.`);
+        else if (components.length != 2 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Incorrect usage of \`${prefix}${components[0].toLowerCase()}\`.`);
         else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
         else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
         else {
@@ -229,7 +239,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         break;
       case 'vocalize':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
-        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}vocalize\`.`);
+        else if (components.length != 2 || !/^\d+$/.test(components[1])) msg.channel.send(`Incorrect usage of \`${prefix}${components[0].toLowerCase()}\`.`);
         else {
           msg.guild.members.fetch(components[1]).then(member => {
             member.roles.remove(msg.guild.roles.cache.filter(role => role.name === "Silenced").array()[0]);
@@ -238,6 +248,25 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           }).catch(error => console.log(error));
         }
         break;
+      case 'oppress':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Incorrect usage of \`${prefix}${components[0].toLowerCase()}\`.`);
+        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
+        else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
+        else {
+          deleteOnView.push(components[1]);
+          msg.channel.send(`<@${components[1]}> has been oppressed.`);
+        }
+        break;
+      case 'depress':
+        if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
+        else if (components.length != 2 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Incorrect usage of \`${prefix}${components[0].toLowerCase()}\`.`);
+        else if (components[1] == msg.author.id) msg.channel.send(`Don't try to ${components[0].toLowerCase()} yourself, <@${msg.author.id}>!`);
+        else if (components[1] == '309501599313821708') msg.channel.send(`You dared to try this command on the bot author <@309501599313821708>?`);
+        else {
+          deleteOnView = deleteOnView.filter(id => {id != components[1]});
+          msg.channel.send(`<@${components[1]}> is no longer oppressed!`);
+        }
       default:
         break;
     }
