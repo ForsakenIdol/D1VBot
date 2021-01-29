@@ -9,7 +9,7 @@ services:
     container_name: d1vbot
     build:
       context: .
-    image: d1vbot:1.0.0
+    image: d1vbot:1.2.0
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
