@@ -109,7 +109,7 @@ client.on('message', msg => {
   // Then, check if the message called a command.
   if (msg.content.startsWith(prefix)) {
     const components = msg.content.split(' ');
-    components[0] = components[0].replace(prefix, "");
+    components[0] = components[0].slice(prefix.length);
     console.log(components);
     switch (components[0].toLowerCase()) {
       case 'help':
@@ -182,14 +182,21 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
         } else msg.channel.send(`Usage: \`${prefix}stats\` to self-query stats or \`${prefix}stats <userid>\` to query stats on another user based on their ID. You can use \`${prefix}whoami\` to get your own user ID.`);
         break;
       case 'wallofdeath':
-        if (!(components.length == 2 && !isNaN(components[1]) && parseInt(components[1]) > 0)) msg.channel.send("**YOU DARE FACE THE WALL OF DEATH WITHOUT KNOWING HOW TO CALL IT?!**");
-        else {
-          // Get how many pings this user wants
-          let num_pings = parseInt(components[1]);
-          let ping_wall = "";
-          for (let i = 0; i < num_pings; i++) ping_wall += `<@${msg.author.id}> `;
+        let num_pings = -1;
+        let max_pings = 50;
+        if (![1, 2].includes(components.length)) { msg.channel.send("**YOU DARE FACE THE WALL OF DEATH WITHOUT KNOWING HOW TO CALL IT?!**"); return; }
+        else if (components.length == 2) {
+          if (isNaN(components[1])) { msg.channel.send("You call that a fucking number? Did you fail kindergarden?"); return; }
+          else if (!parseInt(components[1], 10)) { msg.channel.send("You trying to be a sneaky son of a bitch? POSITIVE INTEGERS ONLY DUMBASS"); return; }
+          else {
+            num_pings = parseInt(components[1]);
+            if (num_pings < 0) { msg.channel.send("What the fuck is a negative sized wall anyway..."); return; }
+            if (num_pings > max_pings) { msg.channel.send(`**That wall is too large for you traveller, it is unlikely you can handle any more than ${max_pings} pings...**`); return; }
+          }
+        } else num_pings = max_pings; // Default number of pings
+        let ping_wall = "";
+          for (let i = 0; i < num_pings; i++) ping_wall += `<@${msg.author.id}>  `;
           msg.channel.send(ping_wall);
-        }
         break;
       case 'prefix':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
@@ -200,6 +207,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           prefix = components[1]; process.env.PREFIX = components[1];
           msg.channel.send(`Successfully changed D1VBot's prefix from \`${oldprefix}\` to \`${prefix}\`.`);
         }
+        break;
       case 'clean':
         if (!admins.includes(msg.author.id)) msg.channel.send("Not enough permissions to use this command.");
         else if (components.length != 2 || !/^\d+$/.test(components[1]) || components[1].length != 18) msg.channel.send(`Incorrect usage of \`${prefix}clean\`.`);
@@ -267,6 +275,7 @@ Welcome to D1VBot! My prefix is \`${prefix}\`.\nSome things you can ask me inclu
           deleteOnView = deleteOnView.filter(id => {id != components[1]});
           msg.channel.send(`<@${components[1]}> is no longer oppressed!`);
         }
+        break;
       default:
         break;
     }
